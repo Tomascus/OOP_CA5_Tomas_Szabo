@@ -3,6 +3,8 @@ package org.example.DAO;
 import org.example.DTO.Circuit;
 import org.example.Exceptions.DaoException;
 
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +56,38 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
                         );
                     }
                     return null;
+                }
+        );
+    }
+
+    // Written by Tomas Szabo
+    @Override
+    public Circuit deleteCircuitById(int id) throws DaoException {
+        return SQLConnectionDecorator(
+                (sql) -> {
+                    PreparedStatement preparedStatement = null;
+                    String query = "SELECT * FROM Circuits WHERE id = ?";
+                    preparedStatement = sql.connection.prepareStatement(query);
+                    preparedStatement.setInt(1,id);
+                    ResultSet rs = sql.statement.executeQuery();
+                    Circuit circuit = null;
+                    if(rs.next())
+                    {
+                        circuit = new Circuit(
+                                rs.getInt("id"),
+                                rs.getString("circuit_name"),
+                                rs.getString("country"),
+                                rs.getFloat("length"),
+                                rs.getInt("turns")
+                        );
+
+                        String query2 = "DELETE FROM Circuits WHERE id = ?";
+                        preparedStatement = sql.connection.prepareStatement(query2);
+                        preparedStatement.setInt(1,id);
+                        preparedStatement.executeUpdate();
+                    }
+
+                    return circuit;
                 }
         );
     }

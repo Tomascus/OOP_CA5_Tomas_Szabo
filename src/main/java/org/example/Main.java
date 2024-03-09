@@ -22,6 +22,9 @@ public class Main {
             System.out.println("\nCall getCircuitById(5)");
             System.out.println("Circuit: " + ICircuitDao.getCircuitById(5));
 
+            System.out.println("\nCall deleteCircuitById(3)");
+            System.out.println("Circuit: " + ICircuitDao.deleteCircuitById(3) + " deleted.");
+
         }
         catch(DaoException e)
         {

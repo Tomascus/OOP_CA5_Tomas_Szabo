@@ -9,6 +9,7 @@ public interface CircuitDaoInterface
 {
     List<Circuit> getAllCircuits() throws DaoException;
     Circuit getCircuitById(int id) throws DaoException;
+    Circuit deleteCircuitById(int id) throws DaoException;
 }
 
 
