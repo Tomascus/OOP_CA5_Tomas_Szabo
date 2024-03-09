@@ -67,21 +67,9 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
                 (sql) -> {
                     //Prepared statement, result set and connection is inside wrapper, therefore writing sql.statement instead of PreparedStatement for example.
                     //Makes it more efficient because it does not have to be defined each time.
-                    String query = "SELECT * FROM Circuits WHERE id = ?";
-                    sql.statement = sql.connection.prepareStatement(query);
-                    sql.statement.setInt(1,id);
-                    sql.result = sql.statement.executeQuery();
-                    Circuit circuit = null;
-                    if(sql.result.next())
-                    {
-                        circuit = new Circuit(
-                                sql.result.getInt("id"),
-                                sql.result.getString("circuit_name"),
-                                sql.result.getString("country"),
-                                sql.result.getFloat("length"),
-                                sql.result.getInt("turns")
-                        );
-
+                    //To make the code more optimized, instead of creating code for getting id, we call method getCircuitById
+                    Circuit circuit = getCircuitById(id);
+                    if (circuit != null) {
                         String query2 = "DELETE FROM Circuits WHERE id = ?";
                         sql.statement = sql.connection.prepareStatement(query2);
                         sql.statement.setInt(1,id);
