@@ -65,26 +65,27 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
     public Circuit deleteCircuitById(int id) throws DaoException {
         return SQLConnectionDecorator(
                 (sql) -> {
-                    PreparedStatement preparedStatement = null;
+                    //Prepared statement, result set and connection is inside wrapper, therefore writing sql.statement instead of PreparedStatement for example.
+                    //Makes it more efficient because it does not have to be defined each time.
                     String query = "SELECT * FROM Circuits WHERE id = ?";
-                    preparedStatement = sql.connection.prepareStatement(query);
-                    preparedStatement.setInt(1,id);
-                    ResultSet rs = sql.statement.executeQuery();
+                    sql.statement = sql.connection.prepareStatement(query);
+                    sql.statement.setInt(1,id);
+                    sql.result = sql.statement.executeQuery();
                     Circuit circuit = null;
-                    if(rs.next())
+                    if(sql.result.next())
                     {
                         circuit = new Circuit(
-                                rs.getInt("id"),
-                                rs.getString("circuit_name"),
-                                rs.getString("country"),
-                                rs.getFloat("length"),
-                                rs.getInt("turns")
+                                sql.result.getInt("id"),
+                                sql.result.getString("circuit_name"),
+                                sql.result.getString("country"),
+                                sql.result.getFloat("length"),
+                                sql.result.getInt("turns")
                         );
 
                         String query2 = "DELETE FROM Circuits WHERE id = ?";
-                        preparedStatement = sql.connection.prepareStatement(query2);
-                        preparedStatement.setInt(1,id);
-                        preparedStatement.executeUpdate();
+                        sql.statement = sql.connection.prepareStatement(query2);
+                        sql.statement.setInt(1,id);
+                        sql.statement.executeUpdate();
                     }
 
                     return circuit;
