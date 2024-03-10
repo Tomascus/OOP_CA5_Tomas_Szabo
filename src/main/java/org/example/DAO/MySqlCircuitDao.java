@@ -5,6 +5,7 @@ import org.example.Exceptions.DaoException;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -78,6 +79,40 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
 
                     return circuit;
                 }
+        );
+    }
+
+    @Override // Written by Darren Meidl --- 10/03/2024 --- 1 hour
+    public Circuit insertCircuit(Circuit c) throws DaoException {
+        return SQLConnectionDecorator(
+                (sql) -> {
+                    // Gather data of this circuit object
+                    int newID = c.getId();
+                    String newCircuitName = c.getCircuitName();
+                    String newCountry = c.getCountry();
+                    float newLength = c.getLength();
+                    int newTurns = c.getTurns();
+                    // Create instance of Circuit object based on values from passed in 'c' object
+                    Circuit newC = new Circuit(newID, newCircuitName, newCountry, newLength, newTurns);
+                    // Create query
+                    String query = "INSERT INTO Circuits VALUES (null, ?, ?, ?, ?)";
+                    sql.statement = sql.connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS); // Ensures that the key of the row can be returned later
+                    // Set the values in the insert statement to be of the new circuit object's values
+                    sql.statement.setString(1,newCircuitName);
+                    sql.statement.setString(2,newCountry);
+                    sql.statement.setFloat(3,newLength);
+                    sql.statement.setInt(4,newTurns);
+                    // Execute the query
+                    sql.statement.executeUpdate();
+                    // Get all the generated ids from the last statement executed (in this case: 1 row inserted = 1 id)
+                    ResultSet keys = sql.statement.getGeneratedKeys();
+                    if (keys.next()){ // only 1 row in the result set, no need for loop
+                        int tempID = keys.getInt(1); // Get the id from the id column
+                        newC.setId(tempID); // set id to the newC object
+                    }
+                    return newC; // After the if statement, it will ensure newC has the id of the row in the last executed statement (which is the newC object we passed in)
+                }
+
         );
     }
 }

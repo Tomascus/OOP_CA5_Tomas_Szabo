@@ -25,6 +25,10 @@ public class Main {
             System.out.println("\nCall deleteCircuitById(3)");
             System.out.println("Circuit: " + ICircuitDao.deleteCircuitById(3) + " deleted.");
 
+            // By Darren Meidl
+            System.out.println("\nCall insertCircuit(circuit)");
+            Circuit circuit = new Circuit(90, "Redbull Ring 2", "Austria", 8, 19);
+            System.out.println("Circuit: " + ICircuitDao.insertCircuit(circuit) + " inserted.");
         }
         catch(DaoException e)
         {
