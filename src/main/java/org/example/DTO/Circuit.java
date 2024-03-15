@@ -16,6 +16,14 @@ public class Circuit
         this.turns = turns;
     }
 
+    // Used in Feature 5 method - this is for inserting new values into an existing entity
+    public Circuit(String circuitName, String country, float length, int turns) {
+        this.circuitName = circuitName;
+        this.country = country;
+        this.length = length;
+        this.turns = turns;
+    }
+
     public Circuit() {}
 
     public int getId() {

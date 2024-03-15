@@ -29,6 +29,11 @@ public class Main {
             System.out.println("\nCall insertCircuit(circuit)");
             Circuit circuit = new Circuit(90, "Redbull Ring 2", "Austria", 8, 19);
             System.out.println("Circuit: " + ICircuitDao.insertCircuit(circuit) + " inserted.");
+
+            // By Darren Meidl
+            System.out.println("\nCall updateCircuit(4, circuit)");
+            Circuit c2 = new Circuit("Redbull Ring 9", "Russia", 99, 19);
+            System.out.println("Circuit: " + ICircuitDao.updateCircuit(4, c2) + " updated.");
         }
         catch(DaoException e)
         {

@@ -105,16 +105,43 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
                     // Execute the query
                     sql.statement.executeUpdate();
                     // Get all the generated ids from the last statement executed (in this case: 1 row inserted = 1 id)
-                    ResultSet keys = sql.statement.getGeneratedKeys();
-                    if (keys.next()){ // only 1 row in the result set, no need for loop
-                        int tempID = keys.getInt(1); // Get the id from the id column
+                    sql.result = sql.statement.getGeneratedKeys();
+                    if (sql.result.next()){ // only 1 row in the result set, no need for loop
+                        int tempID = sql.result.getInt(1); // Get the id from the id column
                         newC.setId(tempID); // set id to the newC object
                     }
                     return newC; // After the if statement, it will ensure newC has the id of the row in the last executed statement (which is the newC object we passed in)
                 }
-
         );
     }
+
+    @Override // Written by Darren Meidl --- 14/03/2024 --- 50 minutes
+    public Circuit updateCircuit(int id, Circuit c) throws DaoException {
+        return SQLConnectionDecorator(
+                (sql) -> {
+                    // Gather data of this circuit object
+                    String newCircuitName = c.getCircuitName();
+                    String newCountry = c.getCountry();
+                    float newLength = c.getLength();
+                    int newTurns = c.getTurns();
+                    // Create instance of Circuit object based on values from passed in 'c' object
+                    Circuit newC = new Circuit(id, newCircuitName, newCountry, newLength, newTurns);
+                    // Create query
+                    String query = "UPDATE Circuits SET circuit_name = ?, country = ?, length = ?, turns = ? WHERE id = ?";
+                    sql.statement = sql.connection.prepareStatement(query);
+                    // Set the values in the update statement to be of the new circuit object's values
+                    sql.statement.setString(1,newCircuitName);
+                    sql.statement.setString(2,newCountry);
+                    sql.statement.setFloat(3,newLength);
+                    sql.statement.setInt(4,newTurns);
+                    sql.statement.setInt(5, id);
+                    // Execute the query
+                    sql.statement.executeUpdate();
+                    return newC;
+                }
+        );
+    }
+
 }
 
 
