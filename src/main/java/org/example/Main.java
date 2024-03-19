@@ -34,6 +34,12 @@ public class Main {
             System.out.println("\nCall updateCircuit(4, circuit)");
             Circuit c2 = new Circuit("Redbull Ring 9", "Russia", 99, 19);
             System.out.println("Circuit: " + ICircuitDao.updateCircuit(4, c2) + " updated.");
+
+            // By Petr Sulc
+            System.out.println("\nCall findCircuitsUsingFilter(country == Austria)");
+            List<Circuit> filteredCircuits = ICircuitDao.findCircuitsUsingFilter((e) -> e.getCountry().equals("Austria"));
+            for (Circuit filteredCircuit : filteredCircuits)
+                System.out.println("Circuit: " + filteredCircuit.toString());
         }
         catch(DaoException e)
         {
