@@ -144,6 +144,7 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
         );
     }
 
+
     // Written by Petr Sulc
     public List<Circuit> findCircuitsUsingFilter(Predicate<Circuit> filter) throws DaoException
     {

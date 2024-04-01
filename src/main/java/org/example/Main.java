@@ -22,6 +22,7 @@ public class Main {
             System.out.println("\nCall getCircuitById(5)");
             System.out.println("Circuit: " + ICircuitDao.getCircuitById(5));
 
+            // By Tomas Szabo
             System.out.println("\nCall deleteCircuitById(3)");
             System.out.println("Circuit: " + ICircuitDao.deleteCircuitById(3) + " deleted.");
 
@@ -40,6 +41,16 @@ public class Main {
             List<Circuit> filteredCircuits = ICircuitDao.findCircuitsUsingFilter((e) -> e.getCountry().equals("Austria"));
             for (Circuit filteredCircuit : filteredCircuits)
                 System.out.println("Circuit: " + filteredCircuit.toString());
+
+            // By Tomas Szabo
+            System.out.println("\nCall circuitsListToJson(circuitList)");
+            List<Circuit> circuitList = ICircuitDao.getAllCircuits();
+            System.out.println("JSON: " + ICircuitDao.circuitListToJson(circuitList));
+
+            // By Tomas Szabo
+            System.out.println("\nCall circuitsToJson(circuitKey)");
+            Circuit circuitKey = ICircuitDao.getCircuitById(5);
+            System.out.println("JSON: " + ICircuitDao.circuitToJson(circuitKey));
         }
         catch(DaoException e)
         {
