@@ -154,6 +154,16 @@ public class MySqlCircuitDao extends MySqlDao implements CircuitDaoInterface
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public String circuitListToJson(List<Circuit> circuitList) throws DaoException {
+        return null;
+    }
+
+    @Override
+    public String circuitToJson(Circuit circuitKey) throws DaoException {
+        return null;
+    }
+
 }
 
 
