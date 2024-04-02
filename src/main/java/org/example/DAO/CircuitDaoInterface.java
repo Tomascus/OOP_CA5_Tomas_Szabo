@@ -14,9 +14,6 @@ public interface CircuitDaoInterface
     Circuit insertCircuit(Circuit c) throws DaoException; // by Darren Meidl
     Circuit updateCircuit(int id, Circuit c) throws DaoException; // by Darren Meidl
     List<Circuit> findCircuitsUsingFilter(Predicate<Circuit> filter) throws DaoException;
-    String circuitListToJson(List<Circuit> circuitList) throws DaoException;
-    String circuitToJson(Circuit circuitKey) throws DaoException;
-
 }
 
 
