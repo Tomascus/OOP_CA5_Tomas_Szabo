@@ -111,4 +111,39 @@ class MySqlCircuitDaoTest { // by Darren Meidl
         System.out.println("ACTUAL JSON: " + actual);
         System.out.println("");
     }
+
+    @Test
+    void getCircuitByIdTest() throws DaoException { // By Petr Sulc --- 08/04/2024
+        System.out.println("TEST: 'getCircuitById(5)' ");
+        Circuit expected = new Circuit(5, "Miami International Autodrome", "United States", 5.4f, 19);
+        Circuit actual = dao.getCircuitById(5);
+        assertEquals(expected, actual);
+        System.out.println("EXPECTED: " + expected);
+        System.out.println("ACTUAL: " + actual);
+        System.out.println("");
+    }
+
+    @Test
+    void findCircuitsUsingFilterTestByID() throws DaoException { // By Petr Sulc --- 08/04/2024
+        System.out.println("TEST: 'findCircuitsUsingFilter((c1) -> c1.getId() == 2)' ");
+        List<Circuit> expected = new ArrayList<Circuit>();
+        expected.add(new Circuit(2, "Jeddah Corniche Circuit", "Saudi Arabia", 6.1f, 27));
+        List<Circuit> actual = dao.findCircuitsUsingFilter((c1) -> c1.getId() == 2);
+        assertEquals(expected, actual);
+        System.out.println("EXPECTED: " + expected);
+        System.out.println("ACTUAL: " + actual);
+        System.out.println("");
+    }
+
+    @Test
+    void findCircuitsUsingFilterTestByName() throws DaoException { // By Petr Sulc --- 08/04/2024
+        System.out.println("TEST: 'findCircuitsUsingFilter((c1) -> c1.getCircuitName().equals(\"Jeddah Corniche Circuit\")' ");
+        List<Circuit> expected = new ArrayList<Circuit>();
+        expected.add(new Circuit(2, "Jeddah Corniche Circuit", "Saudi Arabia", 6.1f, 27));
+        List<Circuit> actual = dao.findCircuitsUsingFilter((c1) -> c1.getCircuitName().equals("Jeddah Corniche Circuit"));
+        assertEquals(expected, actual);
+        System.out.println("EXPECTED: " + expected);
+        System.out.println("ACTUAL: " + actual);
+        System.out.println("");
+    }
 }

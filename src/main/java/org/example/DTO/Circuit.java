@@ -1,5 +1,7 @@
 package org.example.DTO;
 
+import java.util.Objects;
+
 public class Circuit
 {
     private int id;
@@ -22,6 +24,19 @@ public class Circuit
         this.country = country;
         this.length = length;
         this.turns = turns;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Circuit circuit = (Circuit) o;
+        return id == circuit.id && Float.compare(length, circuit.length) == 0 && turns == circuit.turns && Objects.equals(circuitName, circuit.circuitName) && Objects.equals(country, circuit.country);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, circuitName, country, length, turns);
     }
 
     public Circuit() {}
