@@ -1,5 +1,10 @@
 package org.example;
 
+import org.example.DAO.CircuitDaoInterface;
+import org.example.DAO.JsonConverter;
+import org.example.DTO.Circuit;
+import org.example.Exceptions.DaoException;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -7,6 +12,7 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.time.LocalTime;
+import java.util.List;
 
 // Taken from oop-client-server-multithreaded-2024 sample
 
@@ -77,6 +83,8 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
     PrintWriter socketWriter;
     Socket clientSocket;
     final int clientNumber;
+    private CircuitDaoInterface circuitDaoInterface;
+    private JsonConverter jsonConverter;
 
     // Constructor
     public ClientHandler(Socket clientSocket, int clientNumber) {
@@ -103,16 +111,19 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                 // Implement our PROTOCOL
                 // The protocol is the logic that determines the responses given based on requests received.
                 //
-                if (request.startsWith("time"))  // so, client wants the time !
+                if (request.startsWith("1"))  // so, client wants the time !
                 {
                     LocalTime time = LocalTime.now();  // get the time
                     socketWriter.println(time);  // send the time to client (as a string of characters)
                     System.out.println("Server message: time sent to client.");
-                } else if (request.startsWith("echo")) {
-                    String message = request.substring(5); // strip off the leading substring "echo "
-                    socketWriter.println(message);   // send the received message back to the client
-                    System.out.println("Server message: echo message sent to client.");
-                } else if (request.startsWith("quit"))
+
+                } else if (request.startsWith("2")) {
+                    List<Circuit> message = circuitDaoInterface.getAllCircuits();
+                    String jsonMessage = jsonConverter.circuitListToJson(message);
+                    socketWriter.println(jsonMessage);   // send the received message back to the client
+                    System.out.println("Server message: json message sent to client.");
+
+                } else if (request.startsWith("3"))
                 {
                     socketWriter.println("Sorry to see you leaving. Goodbye.");
                     System.out.println("Server message: Client has notified us that it is quitting.");
@@ -124,6 +135,8 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
             }
         } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (DaoException e) {
+            throw new RuntimeException(e);
         } finally {
             this.socketWriter.close();
             try {
