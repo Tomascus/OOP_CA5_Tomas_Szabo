@@ -1,10 +1,14 @@
+
 package org.example;
 
-import org.example.DTO.Circuit;
 import org.example.DAO.JsonConverter;
+import org.example.DTO.Circuit;
 import org.example.Exceptions.DaoException;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
@@ -29,7 +33,13 @@ public class Client {
             System.out.println("Client message: The Client is running and has connected to the server");
             //ask user to enter a command
             Scanner consoleInput = new Scanner(System.in);
-            System.out.println("Valid commands are: \"1\" to Display Entity by Id, or \"2\" to “Display all Entities, \"3\" to “Add an Entity.");
+            System.out.println("|********************************|");
+            System.out.println("|***** F1 CIRCUITS DATABASE *****|");
+            System.out.println("|********************************|");
+            System.out.println("1. Display Circuit by ID");
+            System.out.println("2. Display All Circuits");
+            System.out.println("3. Add a Circuit");
+            System.out.println("4. Quit");
             System.out.println("Please enter a command: ");
             String userRequest = consoleInput.nextLine();
 
@@ -40,27 +50,48 @@ public class Client {
 
                 // process the answer returned by the server
                 //
-                if (userRequest.startsWith("1"))   // if user asked for "1", we expect the server to return a time (in milliseconds)
+                if (userRequest.startsWith("1")) // if the user has entered the "1" command i.e. display entity by id
                 {
-                    String timeString = in.readLine();  // (blocks) waits for response from server, then input string terminated by a newline character ("\n")
-                    System.out.println("Client message: Response from server after \"time\" request: " + timeString);
+                    System.out.println("++DISPLAY CIRCUIT BY ID++");
+                    System.out.println("Enter the ID of a Circuit you want to find.. ");
+                    String id = consoleInput.nextLine(); // read user's input
+                    out.println(id); // send id to server
+
+                    String response = in.readLine(); // get new circuit from server
+                    Circuit circuit = JsonConverter.jsonToCircuit(response); // convert json to circuit
+                    // Print the circuit
+                    System.out.println("---"+circuit.getCircuitName()+"---");
+                    System.out.println("ID: " + circuit.getId());
+                    System.out.println("Country: " + circuit.getCountry());
+                    System.out.println("Length: " + circuit.getLength());
+                    System.out.println("Turns: " + circuit.getTurns());
+                    System.out.println();
                 }
-                else if (userRequest.startsWith("2")) // if the user has entered the "2" command
+                else if (userRequest.startsWith("2")) // if the user has entered the "2" command i.e. display all entities
                 {
+                    System.out.println("++DISPLAY ALL CIRCUITS++");
                     String response = in.readLine();
-                    List<Circuit> CircuitList = JsonConverter.jsonToCircuitList(in.readLine());
+                    List<Circuit> CircuitList = JsonConverter.jsonToCircuitList(response);
                     for (Circuit circuit : CircuitList) {
                         System.out.println("ID: " + circuit.getId());
                         System.out.println("Name: " + circuit.getCircuitName());
                         System.out.println("Country: " + circuit.getCountry());
                         System.out.println("Length: " + circuit.getLength());
                         System.out.println("Turns: " + circuit.getTurns());
-                        System.out.println();
+                        System.out.println(); //To space out each circuit
                     }
                 }
-                else if (userRequest.startsWith("3")) // if the user has entered the "quit" command
+                else if (userRequest.startsWith("3")) // if the user has entered the "3" command
                 {
-                    String response = in.readLine();   // wait for response -
+                    System.out.println("++ADD A CIRCUIT++");
+                    String response = in.readLine();   // wait for response
+                    System.out.println("Client message: Response from server: \"" + response + "\"");
+                    break;  // break out of while loop, client will exit.
+                }
+                else if (userRequest.startsWith("4")) // if the user has entered the "4" command i.e. Quit
+                {
+                    System.out.println("Goodbye :(");
+                    String response = in.readLine();   // wait for response
                     System.out.println("Client message: Response from server: \"" + response + "\"");
                     break;  // break out of while loop, client will exit.
                 }
@@ -68,8 +99,15 @@ public class Client {
                     System.out.println("Command unknown. Try again.");
                 }
 
+                //ask user to enter a command again
                 consoleInput = new Scanner(System.in);
-                System.out.println("Valid commands are: \"1\" to Display Entity by Id, or \"2\" to Display all Entities, \"3\" to Add an Entity.");
+                System.out.println("|********************************|");
+                System.out.println("|***** F1 CIRCUITS DATABASE *****|");
+                System.out.println("|********************************|");
+                System.out.println("1. Display Circuit by ID");
+                System.out.println("2. Display All Circuits");
+                System.out.println("3. Add a Circuit");
+                System.out.println("4. Quit");
                 System.out.println("Please enter a command: ");
                 userRequest = consoleInput.nextLine();
             }
