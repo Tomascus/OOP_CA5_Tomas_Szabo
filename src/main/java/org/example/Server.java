@@ -1,4 +1,3 @@
-
 package org.example;
 
 import org.example.DAO.CircuitDaoInterface;
@@ -103,72 +102,116 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
             ex.printStackTrace();
         }
     }
-    // Old Constructor without json converter or interface
-    public ClientHandler(Socket clientSocket, int clientNumber) {
-        this.clientSocket = clientSocket;  // store socket for closing later
-        this.clientNumber = clientNumber;  // ID number that we are assigning to this client
-        try {
-            // assign to fields
-            this.socketWriter = new PrintWriter(clientSocket.getOutputStream(), true);
-            this.socketReader = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        }
-    }
-    // Taken from oop-client-server-multithreaded-2024 sample
 
+    // Taken from oop-client-server-multithreaded-2024 sample
     @Override
     public void run() {
-        String request;
+        String command;
+        ServerRequest request;
+        String jsonMessage;
         try {
-            while ((request = socketReader.readLine()) != null) {
-                System.out.println("Server: (ClientHandler): Read command from client " + clientNumber + ": " + request);
+            while ((command = socketReader.readLine()) != null) {
+                System.out.println("Server: (ClientHandler): Read command from client " + clientNumber + ": " + command);
+                request = ServerRequest.idToRequest(command);
 
                 // Implement our PROTOCOL
                 // The protocol is the logic that determines the responses given based on requests received.
-                //
-                if (request.startsWith("1"))
+
+                // By Petr Sulc --- 14/04/2024
+                switch(request)
                 {
-                    // By Darren Meidl --- 13/04/2024
-                    String cID = socketReader.readLine(); // read id sent by client
-                    int id = Integer.parseInt(cID); // convert id to integer
-
-                    Circuit c = circuitDaoInterface.getCircuitById(id); // get circuit by id
-                    String jsonMessage = jsonConverter.circuitToJson(c);
-                    socketWriter.println(jsonMessage); // send the received message back to the client
-                    System.out.println("Server message: time sent to client.");
-
-                } else if (request.startsWith("2")) {
-
-                    // By Tomas Szabo --- 12/04/2024
-                    List<Circuit> message = circuitDaoInterface.getAllCircuits(); // get all circuits from DAO method
-                    String jsonMessage = jsonConverter.circuitListToJson(message); // converts to json
-                    socketWriter.println(jsonMessage);   // send the received message back to the client
-                    System.out.println("Server message: json message sent to client.");
-
-                } else if (request.startsWith("4"))
-                {
-                    socketWriter.println("Sorry to see you leaving. Goodbye.");
-                    System.out.println("Server message: Client has notified us that it is quitting.");
-                }
-                else{
-                    socketWriter.println("error I'm sorry I don't understand your request");
-                    System.out.println("Server message: Invalid request from client.");
+                    case GET_CIRCUIT_BY_ID:
+                        // By Darren Meidl --- 13/04/2024
+                        String cID = socketReader.readLine(); // read id sent by client
+                        int id = Integer.parseInt(cID); // convert id to integer
+                        Circuit c = circuitDaoInterface.getCircuitById(id); // get circuit by id
+                        jsonMessage = jsonConverter.circuitToJson(c);
+                        socketWriter.println(jsonMessage); // send the received message back to the client
+                        System.out.println("Server message: circuit with id " + id + " sent to client.");
+                        break;
+                    case GET_ALL_CIRCUITS:
+                        // By Tomas Szabo --- 12/04/2024
+                        List<Circuit> message = circuitDaoInterface.getAllCircuits(); // get all circuits from DAO method
+                        jsonMessage = jsonConverter.circuitListToJson(message); // converts to json
+                        socketWriter.println(jsonMessage);   // send the received message back to the client
+                        System.out.println("Server message: json message sent to client.");
+                        break;
+                    case ADD_NEW_CIRCUIT:
+                        // By Petr Sulc --- 14/04/2024
+                        String newCircuitJson = socketReader.readLine();
+                        Circuit newCircuit = jsonConverter.jsonToCircuit(newCircuitJson);
+                        try {
+                            Circuit addedCircuit = circuitDaoInterface.insertCircuit(newCircuit);
+                            String addedCircuitJson = jsonConverter.circuitToJson(addedCircuit);
+                            socketWriter.println(1);
+                            socketWriter.println(addedCircuitJson);
+                        }
+                        catch (DaoException e)
+                        {
+                            socketWriter.println(0);
+                            socketWriter.println("Insertion Failed: " + e.getMessage());
+                        }
+                        break;
+                    case DISCONNECT:
+                        socketWriter.println("Sorry to see you leaving. Goodbye.");
+                        System.out.println("Server message: Client has notified us that it is quitting.");
+                        break;
+                    case UNKNOWN_REQUEST:
+                        socketWriter.println("ERROR: I'm sorry, I don't understand your request");
+                        System.out.println("Server message: Invalid request from client.");
+                        break;
                 }
             }
-        } catch (IOException ex) {
-            ex.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         } catch (DaoException e) {
             throw new RuntimeException(e);
-        } finally {
+        }
+        finally
+        {
             this.socketWriter.close();
-            try {
+            try
+            {
                 this.socketReader.close();
                 this.clientSocket.close();
-            } catch (IOException ex) {
+            }
+            catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
         System.out.println("Server: (ClientHandler): Handler for Client " + clientNumber + " is terminating .....");
+    }
+}
+
+// By Petr Sulc --- 14/04/2024
+enum ServerRequest
+{
+    UNKNOWN_REQUEST(0),
+    GET_CIRCUIT_BY_ID(1),
+    GET_ALL_CIRCUITS(2),
+    ADD_NEW_CIRCUIT(3),
+    DISCONNECT(4);
+
+    public final int id;
+    ServerRequest(int id)
+    {
+        this.id = id;
+    }
+
+    // By Petr Sulc --- 14/04/2024
+    public static ServerRequest idToRequest(int id)
+    {
+        return (0 < id && id < ServerRequest.values().length) ? ServerRequest.values()[id] : UNKNOWN_REQUEST;
+    }
+
+    // By Petr Sulc --- 14/04/2024
+    public static ServerRequest idToRequest(String id)
+    {
+        try {
+            return ServerRequest.idToRequest(Integer.parseInt(id));
+        }
+        catch(NumberFormatException e) {
+            return UNKNOWN_REQUEST;
+        }
     }
 }

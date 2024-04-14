@@ -6,7 +6,7 @@ import org.example.DTO.Circuit;
 import org.example.Exceptions.DaoException;
 
 import java.util.List;
-public class JsonConverter extends MySqlCircuitDao  {
+public class JsonConverter {
 
     final static Gson gsonParser = new Gson();
 
@@ -18,7 +18,7 @@ public class JsonConverter extends MySqlCircuitDao  {
 
     // Feature 10 | Written by Tomas Szabo --- 12/04/2024 --- 20 minutes
 
-    public static List<Circuit> jsonToCircuitList(String json) throws DaoException {
+    public List<Circuit> jsonToCircuitList(String json) throws DaoException {
         return gsonParser.fromJson(json, new TypeToken<List<Circuit>>(){}.getType()); //TypeToken gson class to specify generic type, in our case specifies that it is list of circuit objects
     }
 
@@ -26,11 +26,10 @@ public class JsonConverter extends MySqlCircuitDao  {
     public String circuitToJson(Circuit circuitKey) throws DaoException {
         return gsonParser.toJson(circuitKey);
     }
+
     // Feature 9 | Written by Darren Meidl --- 13/04/2024 - 5 minutes
-    public static Circuit jsonToCircuit(String json) throws DaoException {
+    public Circuit jsonToCircuit(String json) throws DaoException {
         Circuit c = gsonParser.fromJson(json, Circuit.class);
         return c;
     }
-
-
 }
