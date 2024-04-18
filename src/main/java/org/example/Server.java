@@ -6,10 +6,7 @@ import org.example.DAO.MySqlCircuitDao;
 import org.example.DTO.Circuit;
 import org.example.Exceptions.DaoException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.List;
@@ -30,6 +27,7 @@ public class Server {
         ServerSocket serverSocket =null;
         Socket clientSocket =null;
 
+
         try {
             serverSocket = new ServerSocket(SERVER_PORT_NUMBER);
             System.out.println("Server has started.");
@@ -45,6 +43,7 @@ public class Server {
                 System.out.println("Server: Port number of remote client: " + clientSocket.getPort());
                 System.out.println("Server: Port number of the socket used to talk with client " + clientSocket.getLocalPort());
 
+
                 // create a new ClientHandler for the requesting client, passing in the socket, client number, JsonConverter & CircuitDaoInterface
                 JsonConverter j = new JsonConverter();
                 CircuitDaoInterface i = new MySqlCircuitDao();
@@ -57,8 +56,9 @@ public class Server {
             }
         } catch (IOException ex) {
             System.out.println(ex);
-        }
-        finally{
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally{
             try {
                 if(clientSocket!=null)
                     clientSocket.close();
@@ -75,6 +75,7 @@ public class Server {
         }
         System.out.println("Server: Server exiting, Goodbye!");
     }
+
 }
 
 // Taken from oop-client-server-multithreaded-2024 sample
@@ -101,6 +102,31 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
         } catch (IOException ex) {
             ex.printStackTrace();
         }
+    }
+
+    // sendFile function sample code from: https://github.com/logued/oop-client-server-socket-image
+    private static void sendFile(String path, DataOutputStream dataOutputStream)
+            throws Exception
+    {
+        int bytes = 0;
+        // Open the File at the specified location (path)
+        File file = new File(path);
+        FileInputStream fileInputStream = new FileInputStream(file);
+
+        // send the length (in bytes) of the file to the server
+        dataOutputStream.writeLong(file.length());
+
+        // Here we break file into chunks
+        byte[] buffer = new byte[4 * 1024]; // 4 kilobyte buffer
+
+        // read bytes from file into the buffer until buffer is full, or we reached end of file
+        while ((bytes = fileInputStream.read(buffer))!= -1) {
+            // Send the buffer contents to Server Socket, along with the count of the number of bytes
+            dataOutputStream.write(buffer, 0, bytes);
+            dataOutputStream.flush();   // force the data into the stream
+        }
+        // close the file
+        fileInputStream.close();
     }
 
     // Taken from oop-client-server-multithreaded-2024 sample
@@ -134,7 +160,7 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                         List<Circuit> message = circuitDaoInterface.getAllCircuits(); // get all circuits from DAO method
                         jsonMessage = jsonConverter.circuitListToJson(message); // converts to json
                         socketWriter.println(jsonMessage);   // send the received message back to the client
-                        System.out.println("Server message: json message sent to client.");
+                        System.out.println("Server message: Json circuit list message sent to client.");
                         break;
                     case ADD_NEW_CIRCUIT:
                         // By Petr Sulc --- 14/04/2024
@@ -161,6 +187,28 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                         socketWriter.println(jsonMessage); // send the received message back to the client
                         System.out.println("Server message: circuit with id " + id + " sent to client.");
                         break;
+                    case GET_IMAGES_LIST:
+                        // By Tomas Szabo --- 18/04/2024
+                        System.out.println("++GET IMAGES LIST FROM THE SERVER++");
+                        String jsonImagesList = "[\"F1Logo.png\", \"F1Circuits.png\"]";
+                        socketWriter.println(jsonImagesList); // send the received message back to the client
+                        System.out.println("Server message: Json list of images sent to the client.");
+
+                        String iNumber = socketReader.readLine();
+                        try (DataOutputStream dataOutputStream = new DataOutputStream( clientSocket.getOutputStream()))
+                        {
+                            System.out.println("Sending the File to the Client");
+                            if (iNumber.equals("1")) {
+                                sendFile("images/F1Logo.png", dataOutputStream);  // hardcode location for convenience
+                            } else if (iNumber.equals("2")) {
+                                sendFile("images/F1Circuits.png", dataOutputStream);  // hardcode location for convenience
+                            }
+                            else System.out.println("Wrong input");
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
+
                     case DISCONNECT:
                         socketWriter.println("Sorry to see you leaving. Goodbye.");
                         System.out.println("Server message: Client has notified us that it is quitting.");
@@ -200,7 +248,8 @@ enum ServerRequest
     GET_ALL_CIRCUITS(2),
     ADD_NEW_CIRCUIT(3),
     DELETE_CIRCUIT(4),
-    DISCONNECT(5);
+    GET_IMAGES_LIST(5),
+    DISCONNECT(6);
 
     public final int id;
     ServerRequest(int id)

@@ -4,10 +4,7 @@ import org.example.DAO.JsonConverter;
 import org.example.DTO.Circuit;
 import org.example.Exceptions.DaoException;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.util.List;
 import java.util.Scanner;
@@ -47,7 +44,8 @@ public class Client {
                                 "2. Display All Circuits\n" +
                                 "3. Add a Circuit\n" +
                                 "4. Delete a Circuit\n" +
-                                "5. Quit\n" +
+                                "5. Get Images List\n" +
+                                "6. Quit\n" +
                                 "Please enter a command: ");
                 consoleInput = new Scanner(System.in);
                 requestId = consoleInput.nextLine();
@@ -109,6 +107,25 @@ public class Client {
                         else
                             System.out.println("Client message: Response from server: \"" + response + "\"");
                         break;
+                    case GET_IMAGES_LIST:
+                        // By Tomas Szabo --- 18/04/2024
+                        System.out.println("++GET IMAGES LIST FROM THE SERVER++");
+                        response = in.readLine(); // wait for response
+                        String[] images = jsonConverter.jsonToImages(response);
+                        for (int i = 0; i < images.length; i++) {       // print images available
+                            System.out.println((i + 1) + ". " + images[i]);
+                        }
+                        System.out.println("Enter number of the image you would like to get: ");
+                        String iNumber = consoleInput.nextLine(); // read user's input
+                        out.println(iNumber);
+                        try (DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
+
+                            receiveFile("images/F1Logo_received.png", dataInputStream);
+
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                        break;
                     case DISCONNECT:
                         System.out.println("Goodbye :(");
                         response = in.readLine();   // wait for response
@@ -125,10 +142,55 @@ public class Client {
             System.out.println("Client message: IOException: " + e);
         } catch (DaoException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
         // sockets and streams are closed automatically due to try-with-resources, so no finally block required here.
 
         System.out.println("Exiting client, but server may still be running.");
+    }
+
+    //Receive file function sample code from: https://github.com/logued/oop-client-server-socket-image
+    private static void receiveFile(String fileName, DataInputStream dataInputStream)
+            throws Exception
+    {
+        int bytes = 0;
+        FileOutputStream fileOutputStream = new FileOutputStream(fileName);
+
+
+        // DataInputStream allows us to read Java primitive types from stream e.g. readLong()
+        // read the size of the file in bytes (the file length)
+        long size = dataInputStream.readLong();
+        System.out.println("Server: file size in bytes = " + size);
+
+
+        // create a buffer to receive the incoming bytes from the socket
+        byte[] buffer = new byte[4 * 1024];         // 4 kilobyte buffer
+
+        System.out.println("Server:  Bytes remaining to be read from socket: ");
+
+        // next, read the raw bytes in chunks (buffer size) that make up the image file
+        while (size > 0 &&
+                (bytes = dataInputStream.read(buffer, 0,(int)Math.min(buffer.length, size))) != -1) {
+
+            // above, we read a number of bytes from stream to fill the buffer (if there are enough remaining)
+            // - the number of bytes we must read is the smallest (min) of: the buffer length and the remaining size of the file
+            //- (remember that the last chunk of data read will usually not fill the buffer)
+
+            // Here we write the buffer data into the local file
+            fileOutputStream.write(buffer, 0, bytes);
+
+            // reduce the 'size' by the number of bytes read in.
+            // 'size' represents the number of bytes remaining to be read from the socket stream.
+            // We repeat this until all the bytes are dealt with and the size is reduced to zero
+            size = size - bytes;
+            System.out.print(size + ", ");
+        }
+
+        System.out.println("File is Received");
+
+        System.out.println("Look in the images folder to see the transferred file: parrot_image_received.jpg");
+        fileOutputStream.close();
     }
 
     // By Petr Sulc --- 14/04/2024

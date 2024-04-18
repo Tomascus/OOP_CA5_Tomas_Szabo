@@ -32,4 +32,10 @@ public class JsonConverter {
         Circuit c = gsonParser.fromJson(json, Circuit.class);
         return c;
     }
+
+    // Feature 13 | Written by Tomas Szabo --- 18/04/2024 - 10 minutes
+    public String[] jsonToImages(String json) throws DaoException {
+        return gsonParser.fromJson(json, String[].class);
+    }
 }
+
