@@ -2,7 +2,6 @@ package org.example;
 
 import org.example.DAO.JsonConverter;
 import org.example.DTO.Circuit;
-import org.example.Exceptions.DaoException;
 
 import java.io.*;
 import java.net.Socket;
@@ -24,7 +23,8 @@ public class Client {
                 Socket socket = new Socket("localhost", 8888);
                 // get the socket's input and output streams, and wrap them in writer and readers
                 PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream())))
+                BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream()))
         {
             System.out.println("Client message: The Client is running and has connected to the server");
 
@@ -44,7 +44,7 @@ public class Client {
                                 "2. Display All Circuits\n" +
                                 "3. Add a Circuit\n" +
                                 "4. Delete a Circuit\n" +
-                                "5. Get Images List\n" +
+                                "5. Receive an image\n" +
                                 "6. Quit\n" +
                                 "Please enter a command: ");
                 consoleInput = new Scanner(System.in);
@@ -62,10 +62,7 @@ public class Client {
                         String id = consoleInput.nextLine(); // read user's input
                         out.println(id); // send id to server
                         response = in.readLine(); // wait for response
-                        if (response.equals("1"))
-                            printCircuit(jsonConverter.jsonToCircuit(response));
-                        else
-                            System.out.println("Client message: Response from server: \"" + response + "\"");
+                        printCircuit(jsonConverter.jsonToCircuit(response));
                         break;
                     case GET_ALL_CIRCUITS:
                         System.out.println("++DISPLAY ALL CIRCUITS++");
@@ -102,10 +99,7 @@ public class Client {
                         id = consoleInput.nextLine(); // read user's input
                         out.println(id); // send id to server
                         response = in.readLine(); // wait for response
-                        if (response.equals("4"))
-                            printCircuit(jsonConverter.jsonToCircuit(response));
-                        else
-                            System.out.println("Client message: Response from server: \"" + response + "\"");
+                        printCircuit(jsonConverter.jsonToCircuit(response));
                         break;
                     case GET_IMAGES_LIST:
                         // By Tomas Szabo --- 18/04/2024
@@ -118,13 +112,7 @@ public class Client {
                         System.out.println("Enter number of the image you would like to get: ");
                         String iNumber = consoleInput.nextLine(); // read user's input
                         out.println(iNumber);
-                        try (DataInputStream dataInputStream = new DataInputStream(socket.getInputStream())) {
-
-                            receiveFile("images/F1Logo_received.png", dataInputStream);
-
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                        receiveFile("images/image_received.png", dataInputStream);
                         break;
                     case DISCONNECT:
                         System.out.println("Goodbye :(");
@@ -140,19 +128,13 @@ public class Client {
             } while (running);
         } catch (IOException e) {
             System.out.println("Client message: IOException: " + e);
-        } catch (DaoException e) {
-            throw new RuntimeException(e);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
         }
         // sockets and streams are closed automatically due to try-with-resources, so no finally block required here.
 
         System.out.println("Exiting client, but server may still be running.");
     }
 
-    //Receive file function sample code from: https://github.com/logued/oop-client-server-socket-image
-    private static void receiveFile(String fileName, DataInputStream dataInputStream)
-            throws Exception
+    private static void receiveFile(String fileName, DataInputStream dataInputStream) throws IOException
     {
         int bytes = 0;
         FileOutputStream fileOutputStream = new FileOutputStream(fileName);
@@ -188,20 +170,13 @@ public class Client {
         }
 
         System.out.println("File is Received");
-
-        System.out.println("Look in the images folder to see the transferred file: parrot_image_received.jpg");
         fileOutputStream.close();
     }
 
     // By Petr Sulc --- 14/04/2024
     private void printCircuit(Circuit circuit)
     {
-        /*System.out.printf("---%s---%nID: %s%nCountry: %s%nLength: %s%nTurns: %s%n%n",
-                circuit.getCircuitName(),circuit.getId(),circuit.getCountry(),circuit.getLength(),circuit.getTurns());*/
-        System.out.printf("--- "+circuit.getCircuitName()+" ---" + '\'' +
-                "ID: " + circuit.getId() + '\'' +
-                "Country: " + circuit.getCountry() + '\'' +
-                "Length: "  + circuit.getLength() + '\'' +
-                "Turns: "  + circuit.getTurns() + '\'');
+        System.out.printf("---%s---%nID: %s%nCountry: %s%nLength: %s%nTurns: %s%n%n",
+                circuit.getCircuitName(),circuit.getId(),circuit.getCountry(),circuit.getLength(),circuit.getTurns());
     }
 }
