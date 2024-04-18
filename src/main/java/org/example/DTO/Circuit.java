@@ -1,6 +1,5 @@
-package org.example.DTO;
 
-import java.util.Objects;
+package org.example.DTO;
 
 public class Circuit
 {
@@ -17,26 +16,12 @@ public class Circuit
         this.length = length;
         this.turns = turns;
     }
-
     // Used in Feature 5 method - this is for inserting new values into an existing entity
     public Circuit(String circuitName, String country, float length, int turns) {
         this.circuitName = circuitName;
         this.country = country;
         this.length = length;
         this.turns = turns;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Circuit circuit = (Circuit) o;
-        return id == circuit.id && Float.compare(length, circuit.length) == 0 && turns == circuit.turns && Objects.equals(circuitName, circuit.circuitName) && Objects.equals(country, circuit.country);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, circuitName, country, length, turns);
     }
 
     public Circuit() {}
@@ -83,12 +68,10 @@ public class Circuit
 
     @Override
     public String toString() {
-        return "Circuit{" +
-                "id=" + id +
-                ", circuitName='" + circuitName + '\'' +
-                ", country='" + country + '\'' +
-                ", length=" + length +
-                ", turns=" + turns +
-                '}';
+        return "--- "+circuitName+" ---" + '\'' +
+                "ID: " + id + '\'' +
+                "Country: " + country + '\'' +
+                "Length: "  + length + '\'' +
+                "Turns: "  + turns + '\'';
     }
 }

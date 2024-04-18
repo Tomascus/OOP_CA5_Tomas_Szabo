@@ -46,7 +46,8 @@ public class Client {
                                 "1. Display Circuit by ID\n" +
                                 "2. Display All Circuits\n" +
                                 "3. Add a Circuit\n" +
-                                "4. Quit\n" +
+                                "4. Delete a Circuit\n" +
+                                "5. Quit\n" +
                                 "Please enter a command: ");
                 consoleInput = new Scanner(System.in);
                 requestId = consoleInput.nextLine();
@@ -63,7 +64,10 @@ public class Client {
                         String id = consoleInput.nextLine(); // read user's input
                         out.println(id); // send id to server
                         response = in.readLine(); // wait for response
-                        printCircuit(jsonConverter.jsonToCircuit(response));
+                        if (response.equals("1"))
+                            printCircuit(jsonConverter.jsonToCircuit(response));
+                        else
+                            System.out.println("Client message: Response from server: \"" + response + "\"");
                         break;
                     case GET_ALL_CIRCUITS:
                         System.out.println("++DISPLAY ALL CIRCUITS++");
@@ -93,6 +97,18 @@ public class Client {
                         else
                             System.out.println("Client message: Response from server: \"" + response + "\"");
                         break;
+                    case DELETE_CIRCUIT:
+                        // By Darren Meidl --- 15/04/2024
+                        System.out.println("++DELETE CIRCUIT BY ID++");
+                        System.out.print("Enter the ID of a Circuit you want to delete: ");
+                        id = consoleInput.nextLine(); // read user's input
+                        out.println(id); // send id to server
+                        response = in.readLine(); // wait for response
+                        if (response.equals("4"))
+                            printCircuit(jsonConverter.jsonToCircuit(response));
+                        else
+                            System.out.println("Client message: Response from server: \"" + response + "\"");
+                        break;
                     case DISCONNECT:
                         System.out.println("Goodbye :(");
                         response = in.readLine();   // wait for response
@@ -118,7 +134,12 @@ public class Client {
     // By Petr Sulc --- 14/04/2024
     private void printCircuit(Circuit circuit)
     {
-        System.out.printf("---%s---%nID: %s%nCountry: %s%nLength: %s%nTurns: %s%n%n",
-                circuit.getCircuitName(),circuit.getId(),circuit.getCountry(),circuit.getLength(),circuit.getTurns());
+        /*System.out.printf("---%s---%nID: %s%nCountry: %s%nLength: %s%nTurns: %s%n%n",
+                circuit.getCircuitName(),circuit.getId(),circuit.getCountry(),circuit.getLength(),circuit.getTurns());*/
+        System.out.printf("--- "+circuit.getCircuitName()+" ---" + '\'' +
+                "ID: " + circuit.getId() + '\'' +
+                "Country: " + circuit.getCountry() + '\'' +
+                "Length: "  + circuit.getLength() + '\'' +
+                "Turns: "  + circuit.getTurns() + '\'');
     }
 }

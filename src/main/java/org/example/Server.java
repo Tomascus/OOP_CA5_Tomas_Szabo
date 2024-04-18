@@ -152,6 +152,15 @@ class ClientHandler implements Runnable   // each ClientHandler communicates wit
                             socketWriter.println("Insertion Failed: " + e.getMessage());
                         }
                         break;
+                    case DELETE_CIRCUIT:
+                        // By Darren Meidl --- 15/04/2024
+                        cID = socketReader.readLine(); // read id sent by client
+                        id = Integer.parseInt(cID); // convert id to integer
+                        c = circuitDaoInterface.deleteCircuitById(id); // delete circuit by id
+                        jsonMessage = jsonConverter.circuitToJson(c);
+                        socketWriter.println(jsonMessage); // send the received message back to the client
+                        System.out.println("Server message: circuit with id " + id + " sent to client.");
+                        break;
                     case DISCONNECT:
                         socketWriter.println("Sorry to see you leaving. Goodbye.");
                         System.out.println("Server message: Client has notified us that it is quitting.");
@@ -190,7 +199,8 @@ enum ServerRequest
     GET_CIRCUIT_BY_ID(1),
     GET_ALL_CIRCUITS(2),
     ADD_NEW_CIRCUIT(3),
-    DISCONNECT(4);
+    DELETE_CIRCUIT(4),
+    DISCONNECT(5);
 
     public final int id;
     ServerRequest(int id)
